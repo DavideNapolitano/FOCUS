@@ -85,6 +85,8 @@ class MultiTaskQwen2VL(nn.Module):
         base_model: Union[Qwen2VLForConditionalGeneration, Qwen2_5_VLForConditionalGeneration], 
         object_detection_layer: int = 11, 
         ner_layer: int = 11,
+        vision_layer_percentage: float = 0.1,  # Use 0.5 for 50%
+        language_layer_percentage: float = 0.1,
         num_object_classes: int = 80, 
         num_entity_types: int = 10,
         max_span_length: int = 8,
@@ -109,9 +111,19 @@ class MultiTaskQwen2VL(nn.Module):
             use_boundary_detection=True
         )
         
-        # Layer indices to extract features from (middle-to-upper layers work best)
-        self.object_detection_layer = object_detection_layer
-        self.ner_layer = ner_layer
+        # # Layer indices to extract features from (middle-to-upper layers work best)
+        # self.object_detection_layer = object_detection_layer
+        # self.ner_layer = ner_layer
+
+        # Calculate actual layer indices based on percentages
+        vision_layers = len(base_model.visual.layers)
+        language_layers = len(base_model.model.layers)
+        
+        self.object_detection_layer = int(vision_layers * vision_layer_percentage)
+        self.ner_layer = int(language_layers * language_layer_percentage)
+
+        print(f"Using vision layer {self.object_detection_layer}/{vision_layers} ({vision_layer_percentage*100}%)")
+        print(f"Using language layer {self.ner_layer}/{language_layers} ({language_layer_percentage*100}%)")
         
         # Loss weights for multi-task learning
         self.det_loss_weight = det_loss_weight

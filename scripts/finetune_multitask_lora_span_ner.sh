@@ -47,6 +47,8 @@ deepspeed src/training/train_multitask.py \
     --num_entity_types 97 \
     --ner_layer 11 \
     --ner_loss_weight 0.5 \
+    --vision_layer_percentage 0.5 \
+    --language_layer_percentage 0.25 \
     --max_span_length 8 \
     --use_boundary_labels True \
     --contrastive_loss_weight 0.2 \
