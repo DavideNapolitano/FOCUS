@@ -140,24 +140,16 @@ def train():
     
     # Load base model
     rank0_print(f"Loading base model {model_args.model_id}...")
-    if "Qwen2.5" in model_args.model_id:
-        base_model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
-            model_args.model_id,
-            torch_dtype=compute_dtype,
-            attn_implementation="flash_attention_2" if not training_args.disable_flash_attn2 else "sdpa",
-            **bnb_model_from_pretrained_args
-        )
-    else:
-        base_model = Qwen2VLForConditionalGeneration.from_pretrained(
-            model_args.model_id,
-            torch_dtype=compute_dtype,
-            attn_implementation="flash_attention_2" if not training_args.disable_flash_attn2 else "sdpa",
-            **bnb_model_from_pretrained_args
-        )
+    base_model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        model_args.model_id,
+        torch_dtype=compute_dtype,
+        attn_implementation="flash_attention_2" if not training_args.disable_flash_attn2 else "sdpa",
+        **bnb_model_from_pretrained_args
+    )
     
     # Disable caching during training
     base_model.config.use_cache = False
-    
+    # model_to_configure = model
     # Configure model components
     configure_llm(base_model, training_args)
     configure_vision_tower(base_model, training_args, compute_dtype, training_args.device)
@@ -168,6 +160,8 @@ def train():
         base_model=base_model,
         object_detection_layer=data_args.object_detection_layer,
         ner_layer=data_args.ner_layer,
+        vision_layer_percentage=data_args.vision_layer_percentage,  # Use 0.5 for 50%
+        language_layer_percentage=data_args.language_layer_percentage,
         num_object_classes=data_args.num_object_classes,
         num_entity_types=data_args.num_entity_types,
         det_loss_weight=data_args.detection_loss_weight,
@@ -237,8 +231,8 @@ def train():
     # Load tokenizer and processor
     processor = AutoProcessor.from_pretrained(model_args.model_id, padding_side="right")
 
-    model.config.tokenizer_padding_side = processor.tokenizer.padding_side
-    model.config.vision_lr = training_args.vision_lr
+    model.base_model.config.tokenizer_padding_side = processor.tokenizer.padding_side
+    model.base_model.config.vision_lr = training_args.vision_lr
     
     # Create dataset and data loader
     rank0_print("Preparing datasets...")

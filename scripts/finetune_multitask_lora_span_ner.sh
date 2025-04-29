@@ -35,20 +35,20 @@ deepspeed src/training/train_multitask.py \
     --num_lora_modules -1 \
     --deepspeed scripts/zero3.json \
     --model_id $MODEL_NAME \
-    --data_path /data1/dnapolitano/MM/data/VGVQA/VGVQA/train.json \
+    --data_path /data1/dnapolitano/MM/data/VGVQA/train.json \
     --image_folder /data1/dnapolitano/MM/data/VQA/Images/mscoco/train2014 \
     --include_detection True \
-    --detection_annotation_path /data1/dnapolitano/MM/data/VGVQA/VGVQA/train_annotation.json \
+    --detection_annotation_path /data1/dnapolitano/MM/data/VGVQA/train_annotation.json \
     --num_object_classes 46294 \
     --object_detection_layer 11 \
     --detection_loss_weight 0.5 \
     --include_ner True \
-    --ner_annotation_path /data1/dnapolitano/MM/data/VGVQA/VGVQA/train_NER.json \
+    --ner_annotation_path /data1/dnapolitano/MM/data/VGVQA/train_NER.json \
     --num_entity_types 97 \
     --ner_layer 11 \
     --ner_loss_weight 0.5 \
-    --vision_layer_percentage 0.5 \
-    --language_layer_percentage 0.25 \
+    --vision_layer_percentage 0.1 \
+    --language_layer_percentage 0.1 \
     --max_span_length 8 \
     --use_boundary_labels True \
     --contrastive_loss_weight 0.2 \

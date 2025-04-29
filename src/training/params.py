@@ -90,10 +90,27 @@ class DataArguments:
         default=80,  # COCO has 80 classes
         metadata={"help": "Number of object classes to detect"}
     )
+    
+    # Layer selection parameters (percentage-based approach)
+    vision_layer_percentage: Optional[float] = field(
+        default=0.5,  # 50% by default
+        metadata={"help": "Percentage of vision layers to use for object detection (0.0-1.0)"}
+    )
+    language_layer_percentage: Optional[float] = field(
+        default=0.5,  # 50% by default
+        metadata={"help": "Percentage of language model layers to use for NER (0.0-1.0)"}
+    )
+    
+    # Legacy absolute layer indices (still supported but percentage-based is preferred)
     object_detection_layer: int = field(
         default=11,
-        metadata={"help": "Which layer of the vision tower to use for object detection"}
+        metadata={"help": "Specific vision layer to use for object detection (ignored if vision_layer_percentage is set)"}
     )
+    ner_layer: int = field(
+        default=11,
+        metadata={"help": "Specific language model layer to use for NER (ignored if language_layer_percentage is set)"}
+    )
+    
     detection_loss_weight: float = field(
         default=0.5,
         metadata={"help": "Weight for the object detection loss component"}
@@ -111,10 +128,6 @@ class DataArguments:
     num_entity_types: int = field(
         default=10,
         metadata={"help": "Number of entity types to recognize"}
-    )
-    ner_layer: int = field(
-        default=11,
-        metadata={"help": "Which layer of the language model to use for NER"}
     )
     ner_loss_weight: float = field(
         default=0.5,

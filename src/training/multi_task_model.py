@@ -116,7 +116,7 @@ class MultiTaskQwen2VL(nn.Module):
         # self.ner_layer = ner_layer
 
         # Calculate actual layer indices based on percentages
-        vision_layers = len(base_model.visual.layers)
+        vision_layers = len(base_model.model.layers)
         language_layers = len(base_model.model.layers)
         
         self.object_detection_layer = int(vision_layers * vision_layer_percentage)
