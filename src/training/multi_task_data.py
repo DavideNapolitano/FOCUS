@@ -80,6 +80,7 @@ class MultiTaskDataset(SupervisedDataset):
         try:
             with open(self.detection_annotation_path, 'r') as f:
                 annotations = json.load(f)
+            print(f"Loaded {len(annotations.get('annotations', []))} detection annotations")
             
             # Create image info lookup for dimensions
             image_info = {}
@@ -97,6 +98,8 @@ class MultiTaskDataset(SupervisedDataset):
                         'width': img['width'],
                         'height': img['height']
                     }
+
+            print(f"Loaded {len(image_info)} images")
             
             # Build category map
             category_map = {}
@@ -106,6 +109,8 @@ class MultiTaskDataset(SupervisedDataset):
                         'id': cat['id'],
                         'name': cat['name']
                     }
+
+            print(f"Loaded {len(category_map)} categories")
             
             # Organize annotations by image ID and filename
             if 'annotations' in annotations:
@@ -116,6 +121,8 @@ class MultiTaskDataset(SupervisedDataset):
                     img_filename = None
                     if img_id in image_info:
                         img_filename = os.path.basename(image_info[img_id]['file_name'])
+                    
+                    # print(f"Processing annotation for image ID: {img_id}, filename: {img_filename}")
                     
                     # Store by both ID and filename for flexibility
                     for key in [img_id, img_filename]:
@@ -184,7 +191,9 @@ class MultiTaskDataset(SupervisedDataset):
         """Extract image ID from the source data"""
         # Try standard ID field
         image_id = source.get('id', None)
-        image_id = image_id[:-3]
+        # print(f"Extracting image ID: {image_id}")
+        image_id = int(str(image_id)[:-3])
+        # print(f"Extracted image ID: {image_id}")
         
         # # If no ID, try using image filename
         # if image_id is None and 'image' in source:
@@ -214,7 +223,7 @@ class MultiTaskDataset(SupervisedDataset):
         bio_labels = torch.zeros_like(input_ids)
         
         # Fill in spans with B (begin) and I (inside) tags
-        for start, end, _ in spans:
+        for start, end, _, _, _, _ in spans:
             if start < bio_labels.size(0) and end <= bio_labels.size(0):
                 # Mark begin token
                 bio_labels[start] = 1  # B
@@ -309,6 +318,9 @@ class MultiTaskDataset(SupervisedDataset):
                 )
                 data_dict['span_labels'] = span_labels
                 data_dict['candidate_spans'] = candidate_spans
+        
+        print(source)
+        print(data_dict)
         
         return data_dict
 

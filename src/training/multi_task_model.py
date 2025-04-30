@@ -96,6 +96,7 @@ class MultiTaskQwen2VL(nn.Module):
     ):
         super().__init__()
         self.base_model = base_model
+        self.config= base_model.config
         
         # Extract hidden size from the base model
         hidden_size = self.base_model.config.hidden_size
@@ -356,3 +357,36 @@ class MultiTaskQwen2VL(nn.Module):
         loss = F.cross_entropy(similarity, labels)
         
         return loss
+
+    def gradient_checkpointing_enable(self, gradient_checkpointing_kwargs=None):
+        """Enable gradient checkpointing for the base model"""
+        if hasattr(self.base_model, 'gradient_checkpointing_enable'):
+            self.base_model.gradient_checkpointing_enable(gradient_checkpointing_kwargs=gradient_checkpointing_kwargs)
+            print("Gradient checkpointing enabled for base model")
+        else:
+            print("Warning: base model does not support gradient_checkpointing_enable")
+    
+    def gradient_checkpointing_disable(self):
+        """Disable gradient checkpointing for the base model"""
+        if hasattr(self.base_model, 'gradient_checkpointing_disable'):
+            self.base_model.gradient_checkpointing_disable()
+            print("Gradient checkpointing disabled for base model")
+        else:
+            print("Warning: base model does not support gradient_checkpointing_disable")
+    
+    def _set_gradient_checkpointing(self, module, value=False):
+        """Set gradient checkpointing for the base model"""
+        if hasattr(self.base_model, '_set_gradient_checkpointing'):
+            self.base_model._set_gradient_checkpointing(module, value)
+        else:
+            print("Warning: base model does not support _set_gradient_checkpointing")
+    
+    # Add method to enable input gradients - needed for gradient checkpointing
+    def enable_input_require_grads(self):
+        """Enable input gradients for gradient checkpointing"""
+        if hasattr(self.base_model, 'enable_input_require_grads'):
+            self.base_model.enable_input_require_grads()
+        else:
+            def make_inputs_require_grad(module, input, output):
+                output.requires_grad_(True)
+            self.base_model.get_input_embeddings().register_forward_hook(make_inputs_require_grad)
